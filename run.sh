@@ -52,7 +52,7 @@ check_fleasion() {
   if [[ ! -f fleasion.py ]]; then
     # shellcheck disable=SC2016
     echo '`fleasion.py` not found. Downloading,,,'
-    curl -sfLO "$fleasion_link/fleasion.py" 1>/dev/null
+    curl -fLO "$fleasion_link/fleasion.py"
   fi
   clear
 }
