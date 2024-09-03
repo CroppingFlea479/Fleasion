@@ -23,6 +23,10 @@ RUN_FILE = 'run.bat'
 GREEN, RED, BLUE, DEFAULT = '\033[32m', '\033[31m', '\033[34m', '\033[0m'
 
 
+#NOTE: os_name isn't used until line 216
+os_name = platform.system()
+clr = 'cls' if os_name == 'Windows' else 'clear'
+
 def fetch_lines(url, num_lines=1):
     response = requests.get(url)
     lines = response.text.splitlines()
@@ -104,7 +108,7 @@ def get_version():
         print(f"Created {BLUE}{presets_file}{DEFAULT}")
 
     time.sleep(1)
-    os.system('cls')
+    os.system(clr)
 
 
 def dlist(area):
@@ -211,8 +215,6 @@ def preset_check():
 
 get_version()
 
-os_name = platform.system()
-
 if os_name == "Windows":
     folder_path = os.path.join(os.getenv('TEMP'), 'roblox', 'http')
 elif os_name == "Linux":
@@ -245,7 +247,7 @@ while mod_cache == False or pf_cache == False:
 
     if mod_cache == True and pf_cache == True:
         time.sleep(1)
-        os.system('cls')
+        os.system(clr)
 
 with open('assets.json', 'r') as file:
     data = json.load(file)
