@@ -230,29 +230,33 @@ elif os_name == "Linux":
 else:
     print(f"Unsupported OS - {os}")
     exit()
+    
+skiphashcheck = False
+if os.path.exists('settings.inf'):
+    with open('settings.inf', 'r') as f:
+        data = f.read()
+        if 'DisableHashCheck==True' in data:
+            skiphashcheck = True
+else: open('settings.inf', 'a')
+if skiphashcheck == True: pass
+else:
+    mod_cache_check_path = os.path.join(folder_path, '3dbc81ab51ae36ab1de45855c9bb2b15') # 29ec14d6f908cabca7fae131487d96d8, 016a313606e2f99a85bb1a91083206fc
+    pf_cache_check_path = os.path.join(folder_path, '7b8ca4a4ec7addd0f55179a86e49a5a1' if os_name == 'Linux' else '8a7090ac9b2e858f4aee9e19a0bfd562')
 
-mod_cache = False
-pf_cache = False
+    mod_cache = os.path.exists(mod_cache_check_path)
+    pf_cache = os.path.exists(pf_cache_check_path)
 
-mod_cache_check_path = os.path.join(folder_path, '3dbc81ab51ae36ab1de45855c9bb2b15') # 29ec14d6f908cabca7fae131487d96d8, 016a313606e2f99a85bb1a91083206fc
-pf_cache_check_path = os.path.join(folder_path, '7b8ca4a4ec7addd0f55179a86e49a5a1' if os_name == 'Linux' else '8a7090ac9b2e858f4aee9e19a0bfd562')
+    if not mod_cache or not pf_cache:
+        print(f"{RED}Missing cache, join prompted {'experiences' if not mod_cache or not pf_cache else 'experience'}.{DEFAULT}")
+    if not mod_cache:
+        webbrowser.open_new_tab("https://www.roblox.com/games/18504289170/texture-game")
+    if not pf_cache:
+        webbrowser.open_new_tab("https://www.roblox.com/games/292439477/Phantom-Forces")
 
-if os.path.exists(mod_cache_check_path):
-    mod_cache = True
-if os.path.exists(pf_cache_check_path):
-    pf_cache = True
-
-if not mod_cache or not pf_cache:
-    print(f"{RED}Missing cache, join prompted {'experiences' if not mod_cache or not pf_cache else 'experience'}.{DEFAULT}")
-if not mod_cache:
-    webbrowser.open_new_tab("https://www.roblox.com/games/18504289170/texture-game")
-if not pf_cache:
-    webbrowser.open_new_tab("https://www.roblox.com/games/292439477/Phantom-Forces")
-
-while not mod_cache or not pf_cache:
-    if os.path.exists(mod_cache_check_path) and not mod_cache:
-        print(f"{GREEN}Modding{DEFAULT} cache detected")
-        mod_cache = True
+    while not mod_cache or not pf_cache:
+        if os.path.exists(mod_cache_check_path) and not mod_cache:
+            print(f"{GREEN}Modding{DEFAULT} cache detected")
+            mod_cache = True
 
     if os.path.exists(pf_cache_check_path) and not pf_cache:
         print(f"{GREEN}PF{DEFAULT} cache detected")
@@ -262,11 +266,11 @@ while not mod_cache or not pf_cache:
         time.sleep(1)
         os.system(clear_command)
 
-with open('assets.json', 'r') as file:
-    data = json.load(file)
+    with open('assets.json', 'r') as file:
+        data = json.load(file)
 
-with open('presets.json', 'r') as file:
-    presets = json.load(file)
+    with open('presets.json', 'r') as file:
+        presets = json.load(file)
 
 
 def replace(files_to_delete, file_to_replace):
@@ -791,9 +795,10 @@ while True:
             "DFIntAssetPreloading": "9999999",
             "DFIntHttpCacheCleanMinFilesRequired": "9999999"
         }
-
+        accsetting=True
         if not os.path.exists(b_path):
-            print(f"{RED}Bloxstrap not found{DEFAULT}")
+            print(f"{RED}Bloxstrap not found. Auto Cache Clear setting will not be accessible.{DEFAULT}\n")
+            accsetting=False
         else:
             if not os.path.exists(settings_file_path):
                 print(f"{RED}Settings file not found: {settings_file_path}{DEFAULT}")
@@ -808,35 +813,65 @@ while True:
                         break
 
                 cache_color = RED if cacheclear == "False" else BLUE
+        with open('settings.inf', 'r') as f:
+            data = f.read()
+            if 'DisableHashCheck==True' not in data:
+                disablehashcheck=False
+                dhc_color=RED
+            else:
+                disablehashcheck=True
+                dhc_color=BLUE
+        
+        if accsetting:
+                print(f"\nSettings:\n1: {GREEN}Auto Cache Clear : {cache_color}{cacheclear}{DEFAULT}\n2: {GREEN}Disable hash check (skip texture game/pf) : {dhc_color}{disablehashcheck}{DEFAULT}\n")
+        else:     
+            print(f"\nSettings:\n1: {RED}Auto Cache Clear (Inaccessible without Bloxstrap){DEFAULT}\n2: {GREEN}Disable hash check (skip texture game/pf) : {dhc_color}{disablehashcheck}{DEFAULT}\n")
 
-                print(
-                    f"\nSettings:\n1: {GREEN}Auto Cache Clear : {cache_color}{cacheclear}{DEFAULT}\n"
-                )
+        settings = input(": ")
 
-                settings = input(": ")
-                try:
-                    match int(settings):
-                        case 1:
-                            if cacheclear == "False":
-                                for key in cache_flags.keys():
-                                    settings_data.pop(key, None)
-                                cacheclear = "True"
-                                val2 = "True"
-                                val_color = BLUE
-                            else:
-                                settings_data.update(cache_flags)
-                                cacheclear = "False"
-                                val2 = "False"
-                                val_color = RED
-                            val = "Auto Cache Clear"
-                        case _:
-                            print("Invalid number.")
+        try:
+            match int(settings):
+                case 1:
+                    if accsetting==False:
+                        print(f"{RED}Bloxstrap not found. Auto Cache Clear setting won't work without it. \nPress enter to go back.")
+                        input()
+                        break
+                    if cacheclear == "False":
+                        for key in cache_flags.keys():
+                            settings_data.pop(key, None)
+                        cacheclear = "True"
+                        val2 = "True"
+                        val_color = BLUE
+                    else:
+                        settings_data.update(cache_flags)
+                        cacheclear = "False"
+                        val2 = "False"
+                        val_color = RED
+                    val = "Auto Cache Clear"
+                case 2:
+                    with open('settings.inf', 'r+') as f:
+                        if disablehashcheck==False:
+                            f.write('DisableHashCheck==True')
+                            dhc_color = BLUE
+                            disablehashcheck = True
+                            val_color = BLUE
+                            val2 = True
+                        else:
+                            f.write('DisableHashCheck==False')
+                            dhc_color = RED
+                            disablehashcheck = False
+                            val2 = False
+                            val_color = RED
+                    val = "Disable Hash Check"
+                    
+                case _:
+                    print("Invalid number.")
 
-                    with open(settings_file_path, 'w') as file:
-                        json.dump(settings_data, file, indent=4)
+            with open(settings_file_path, 'w') as file:
+                json.dump(settings_data, file, indent=4)
 
-                    print(f"\n{GREEN}Successfully changed {BLUE}{val}{GREEN} to {val_color}{val2}{DEFAULT}!")
-
+            print(f"\n{GREEN}Successfully changed {BLUE}{val}{GREEN} to {val_color}{val2}{DEFAULT}!")
+            
                 except ValueError:
                     print(f"{RED}Invalid input. Please enter a number.{DEFAULT}")
                 except Exception as e:
